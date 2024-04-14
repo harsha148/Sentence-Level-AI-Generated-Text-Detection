@@ -22,11 +22,14 @@ def add_args_extract_features(parser):
 def extract_features(args):
     model = None
     try:
+        logging.info(f'Initializing model object by the model type given:{args.model}')
         model = get_model_by_enum(Model_Enum[args.model.upper()])
+        logging.info(f'Initialized model: {model}')
     except Exception:
         logging.error(f'Invalid model name entered: {args.model}. Please pick a model from (GPT2, GPTJ, GPTNEO,'
                       f' Llama)')
     if model:
+        logging.info('Extracting features from model')
         features = model.extract_features(args.text)
 
 
