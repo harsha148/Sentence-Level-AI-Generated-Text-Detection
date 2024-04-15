@@ -1,8 +1,9 @@
 import argparse
 import logging
+import sys
 
 from src.utilities.Model_Enum import Model_Enum
-from src.utilities.utility import get_model_by_enum
+from src.utilities.common import get_model_by_enum
 
 
 def configure_cmds(subparsers):
@@ -22,9 +23,9 @@ def add_args_extract_features(parser):
 def extract_features(args):
     model = None
     try:
-        logging.info(f'Initializing model object by the model type given:{args.model}')
-        model = get_model_by_enum(Model_Enum[args.model.upper()])
-        logging.info(f'Initialized model: {model}')
+        logging.error(f'Initializing model object by the model type given:{args.model}')
+        model = get_model_by_enum(args.model.upper())
+        logging.error(f'Initialized model: {model}')
     except Exception:
         logging.error(f'Invalid model name entered: {args.model}. Please pick a model from (GPT2, GPTJ, GPTNEO,'
                       f' Llama)')
