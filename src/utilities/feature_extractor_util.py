@@ -4,22 +4,20 @@ import torch
 from torch.nn import CrossEntropyLoss
 
 
-def get_words(text: str) -> list[str]:
+def get_words(text: str, is_llama: bool = False) -> list[str]:
     pattern = re.compile(r'\S+|\s')
     words = pattern.findall(text)
+    if is_llama:
+        words = ["▁" if item == " " else item for item in words]
     return words
 
 
 def tokenwise_loss(outputs, labels):
     logits = outputs.logits.squeeze()
     shifted_logits = logits[..., :-1, :].contiguous()
-    print(f'Shape of the logits after squeezed and shifted:{shifted_logits.shape}')
     shifted_labels = labels.squeeze()[1:].contiguous()
-    print(f'Shape of labels after shifting:{shifted_labels.shape}')
     cross_entropy_loss = CrossEntropyLoss(reduction='none')
     loss_list = cross_entropy_loss(shifted_logits, shifted_labels)
-    print('Loss calculated as cross entropy is')
-    print(loss_list)
     return loss_list.mean().item(), loss_list
 
 
@@ -55,10 +53,6 @@ def get_bytes_to_words_mapping(words, byte_encoder):
         bytes_for_word = [byte_encoder[b] for b in words[i].encode('utf-8')]
         bytes_list.extend(bytes_for_word)
         bytes_to_words.extend([i for j in range(len(bytes_for_word))])
-    print('Extracted the bytes corresponding to the sentence')
-    print(bytes_list)
-    print('Mapping between bytes and words is as follows')
-    print(bytes_to_words)
     return bytes_list, bytes_to_words
 
 
