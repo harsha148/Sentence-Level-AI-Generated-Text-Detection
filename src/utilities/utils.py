@@ -95,14 +95,14 @@ def dataset_split_helper(data_path, train_path, test_path, train_ratio=0.9):
     logging.info("The number of test dataset samples: %d", len(test_data))
 
 
-def construct_bmes_labels(labels):
-    prefix = ['B-', 'M-', 'E-', 'S-']
-    id2label = {}
-    counter = 0
+def create_tag_mapping(label_dict):
+    tag_prefixes = ['B-', 'M-', 'E-', 'S-']
+    tag_map = {}
+    index = 0
 
-    for label, id in labels.items():
-        for pre in prefix:
-            id2label[counter] = pre + label
-            counter += 1
+    for label, id in label_dict.items():
+        for prefix in tag_prefixes:
+            tag_map[index] = prefix + label
+            index += 1
 
-    return id2label
+    return tag_map

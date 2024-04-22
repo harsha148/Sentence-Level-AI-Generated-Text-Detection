@@ -3,7 +3,8 @@ import os
 import torch
 from training.trainer import Trainer
 from model import SeqXGPTModel
-from src.utilities.utils import dataset_split_helper, construct_bmes_labels
+from utilities.datahandler import DataHandler
+from src.utilities.utils import dataset_split_helper, create_tag_mapping
 from evaluation.evaluator import Evaluator
 
 
@@ -39,26 +40,26 @@ def main():
     if args.split_dataset:
         dataset_split_helper(args.data_path, args.train_path, args.test_path, args.train_ratio)
 
-    # Labels and model initialization
+    # Setting labels
     en_labels = {'gpt2': 0, 'gptneo': 1, 'gptj': 2, 'llama': 3, 'gpt3re': 4, 'human': 5}
-    id2label = construct_bmes_labels(en_labels)
-    label2id = {v: k for k, v in id2label.items()}
+    id2label = create_tag_mapping(en_labels)
 
-    # change this as per the dataloader
-    data = DataManager(args.train_path, args.test_path, args.batch_size, args.seq_len, 'human', id2label)
+    # Loading the data
+    data = DataHandler(args.train_path, args.test_path, args.batch_size, args.seq_len, 'human', id2label)
 
+    # Model Initialization
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = SeqXGPTModel(id2labels=id2label, seq_len=args.seq_len).to(device)
 
-    # Training and evaluation setup
+    # Setup for training and evaluation
     trainer = Trainer(data, model, en_labels, id2label, args)
     evaluator = Evaluator(data.test_dataloader, model, en_labels, id2label, device)
 
     if args.do_test:
         print("Log INFO: Performing test...")
-        model_path = 'path_to_saved_model.pth'  # Update with actual path if needed
+        model_path = 'path_to_saved_model.pth'  # Update with actual path
         model.load_state_dict(torch.load(model_path))
-        evaluation_results = evaluator.test(content_level_eval=args.test_content)
+        evaluation_results = evaluator.evaluate_model(content_level_eval=args.test_content)
         print("Evaluation Results:", evaluation_results)
     else:
         print("Log INFO: Starting training...")
