@@ -78,9 +78,9 @@ def parse_args():
 def main():
     args = parse_args()
 
-    # Ensure output directory exists
-    if not os.path.exists(args.output_dir):
-        os.makedirs(args.output_dir)
+    # # Ensure output directory exists
+    # if not os.path.exists(args.output_dir):
+    #     os.makedirs(args.output_dir)
 
     # Map of models
     model_extractors = {
