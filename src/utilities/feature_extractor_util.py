@@ -12,6 +12,12 @@ def get_words(text: str, is_llama: bool = False) -> list[str]:
     return words
 
 
+def split_sentence(sentence, use_sp=False):
+    total_char_count = len(sentence)
+    total_char_count += 1 if total_char_count == 0 else 0
+    return get_words(sentence, use_sp)
+
+
 def tokenwise_loss(outputs, labels):
     logits = outputs.logits.squeeze()
     shifted_logits = logits[..., :-1, :].contiguous()

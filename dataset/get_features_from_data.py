@@ -25,6 +25,7 @@ en_labels = {
 def extract_features(model, text):
     """
     Extract features using the specified model.
+    Extracts the features for the given text sequence based on the perplexities of the model GPTNeo for the given sequence
     """
     return model.extract_features(text)
 
@@ -44,7 +45,7 @@ def process_file(input_file, output_file, models):
         label_int = en_labels.get(label, None)  # Get label integer from dictionary
 
         aggregated_features = {
-            'features': [],
+            'wordwise_loss_list': [],
             'label_int': label_int,
             'label': label,
             'text': text
@@ -52,8 +53,8 @@ def process_file(input_file, output_file, models):
 
         for model_name, model in models.items():
             try:
-                features = extract_features(model, text)
-                aggregated_features['features'].append(features)
+                wordwise_loss_list = extract_features(model, text)
+                aggregated_features['wordwise_loss_list'].append(wordwise_loss_list)
             except Exception as e:
                 print(f"Error processing {text} with {model_name}: {str(e)}")
                 continue

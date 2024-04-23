@@ -17,31 +17,6 @@ def set_seed(seed):
     torch.manual_seed(seed)
 
 
-def split_en_sentence(sentence, use_sp=False):
-    pattern = re.compile(r'\S+|\s')
-    words = pattern.findall(sentence)
-    if use_sp:
-        words = ["▁" if item == " " else item for item in words]
-    return words
-
-
-def split_cn_sentence(sentence, use_sp=False):
-    words = list(sentence)
-    if use_sp:
-        words = ["▁" if item == " " else item for item in words]
-    return words
-
-
-def split_sentence(sentence, use_sp=False, cn_percent=0.2):
-    total_char_count = len(sentence)
-    total_char_count += 1 if total_char_count == 0 else 0
-    chinese_char_count = sum('\u4e00' <= char <= '\u9fff' for char in sentence)
-    if chinese_char_count / total_char_count > cn_percent:
-        return split_cn_sentence(sentence, use_sp)
-    else:
-        return split_en_sentence(sentence, use_sp)
-
-
 def save_dataset(fpath, data_samples):
     """
     Saves data samples to a file in JSON format.

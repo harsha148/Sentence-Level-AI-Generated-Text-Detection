@@ -1,4 +1,3 @@
-import numpy as np
 import os
 import torch
 import json
@@ -6,7 +5,8 @@ from tqdm import tqdm
 from pathlib import Path
 from datasets import Dataset, DatasetDict
 from torch.utils.data.dataloader import DataLoader, RandomSampler, SequentialSampler
-from utils import set_seed, split_sentence
+from utils import set_seed
+from feature_extractor_util import split_sentence
 
 
 class DataHandler:
@@ -58,29 +58,13 @@ class DataHandler:
         text, label = sample['text'], sample['label']
         prompt_len, label_int = sample['prompt_len'], sample['label_int']
 
-        begin_idx_list, ll_tokens_list = sample['begin_idx_list'], sample['ll_tokens_list']
+        wordwise_loss_list = sample['wordwise_loss_list']  # This is a list of lists from different models
 
-        # Get the maximum value in begin_idx_list, which indicates where we need to truncate.
-        max_begin_idx = np.max(np.array(begin_idx_list))
+        # Transpose to get list where each sublist contains features from all models for a particular word
+        features_per_word = list(zip(*wordwise_loss_list))
+        processed_features = [list(word_features) for word_features in features_per_word]
 
-        # Truncate all vectors
-        for idx, ll_tokens in enumerate(ll_tokens_list):
-            ll_tokens_list[idx] = ll_tokens[max_begin_idx:]
-
-        # Get the length of all vectors and take the minimum
-        min_len = np.min([len(ll_tokens) for ll_tokens in ll_tokens_list])
-
-        # Align the lengths of all vectors
-        for idx, ll_tokens in enumerate(ll_tokens_list):
-            ll_tokens_list[idx] = ll_tokens[:min_len]
-        if len(ll_tokens_list) == 0 or len(ll_tokens_list[0]) == 0:
-            return
-
-        ll_tokens_list = np.array(ll_tokens_list)
-        ll_tokens_list = ll_tokens_list.transpose()
-        ll_tokens_list = ll_tokens_list.tolist()
-
-        samples_dict['features'].append(ll_tokens_list)
+        samples_dict['features'].append(processed_features)
         samples_dict['prompt_len'].append(prompt_len)
         samples_dict['label'].append(label)
         samples_dict['text'].append(text)
@@ -91,7 +75,7 @@ class DataHandler:
         sampler = RandomSampler(dataset) if is_train else SequentialSampler(dataset)
         return DataLoader(dataset, batch_size=self.batch_size, sampler=sampler, collate_fn=self.collate_data)
 
-    def data_collator(self, samples):
+    def collate_data(self, samples):
         batch = {}
 
         features = [sample['features'] for sample in samples]
@@ -157,6 +141,3 @@ class DataHandler:
             ids.extend([self.label2id['M-' + label]] * (seq_len - 2))
             ids.append(self.label2id['E-' + label])
             return torch.tensor(ids, dtype=torch.long)
-
-
-
