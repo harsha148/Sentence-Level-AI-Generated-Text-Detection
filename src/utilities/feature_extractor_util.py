@@ -76,3 +76,11 @@ def get_wordwise_loss_list(bytes_to_words, bytewise_loss):
         wordwise_loss.append(torch.Tensor(token_loss).mean().item())
         token_start_index = token_end_index
     return wordwise_loss
+
+
+def get_begin_word_idx(self, input_ids, bbs_to_words):
+    input_ids = input_ids.squeeze()
+    begin_token = self.base_tokenizer._convert_id_to_token(input_ids[0])
+    byte_list = [self.byte_decoder[c] for c in begin_token]
+    begin_word_idx = bbs_to_words[len(byte_list) - 1] + 1
+    return begin_word_idx
