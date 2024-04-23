@@ -1,8 +1,6 @@
 import argparse
 import logging
-import sys
 
-from src.utilities.Model_Enum import Model_Enum
 from src.utilities.common import get_model_by_enum
 
 

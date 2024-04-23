@@ -30,3 +30,4 @@ class GPTNeo_Feature_Extractor(Base_Feature_Extractor):
         wordwise_loss_list = get_wordwise_loss_list(bytes_to_words, bytewise_loss_list)
         print('Extracted word wise loss list for the sentence given')
         print(wordwise_loss_list)
+        return wordwise_loss_list

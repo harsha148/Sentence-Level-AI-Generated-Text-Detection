@@ -18,7 +18,6 @@ class GPTJ_Feature_Extractor(Base_Feature_Extractor):
         self.byte_encoder = bytes_to_unicode()
         self.byte_decoder = {unicode_val: byte_key for byte_key, unicode_val in self.byte_encoder.items()}
 
-
     def extract_features(self, txt):
         # extracts the features for the given text sequence based on the perplexities of the model GPTJ for the given
         # sequence
@@ -33,3 +32,4 @@ class GPTJ_Feature_Extractor(Base_Feature_Extractor):
         wordwise_loss_list = get_wordwise_loss_list(bytes_to_words, bytewise_loss_list)
         print('Extracted word wise loss list for the sentence given')
         print(wordwise_loss_list)
+        return wordwise_loss_list

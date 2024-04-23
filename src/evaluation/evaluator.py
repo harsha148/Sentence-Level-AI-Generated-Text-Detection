@@ -21,7 +21,7 @@ class Evaluator:
         actual_labels = []
         predicted_labels = []
         all_logits = []
-        for step, batch in enumerate(tqdm(self.dataset.test_dataloader, desc="Evaluating")):
+        for step, batch in enumerate(tqdm(self.data.test_dataloader, desc="Evaluating")):
             for key, value in batch.items():
                 if isinstance(value, torch.Tensor):
                     batch[key] = value.to(self.device)
