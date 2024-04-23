@@ -4,7 +4,7 @@ from tqdm import tqdm
 from sklearn.metrics import precision_score, recall_score, accuracy_score, f1_score
 from collections import Counter
 import nltk
-from src.utilities.utils import split_sentence
+from src.utilities.feature_extractor_util import split_sentence
 
 
 class Evaluator:

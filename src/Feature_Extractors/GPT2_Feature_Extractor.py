@@ -15,8 +15,9 @@ class GPT2_Feature_Extractor(Base_Feature_Extractor):
         self.byte_decoder = {unicode_val: byte_key for byte_key, unicode_val in self.byte_encoder.items()}
 
     def extract_features(self, txt):
-        # extracts the features for the given text sequence based on the perplexities of the model GPT-2 for the given
-        # sequence
+        """
+        Extracts the features for the given text sequence based on the perplexities of the model GPT2 for the given sequence
+        """
         tokens = self.tokenizer(txt, return_tensors='pt').to(self.device)
         input_token_ids = labels = tokens.input_ids[:, :1024, ]
         outputs = self.model(input_token_ids)

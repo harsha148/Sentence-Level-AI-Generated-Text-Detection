@@ -25,7 +25,6 @@ en_labels = {
 def extract_features(model, text):
     """
     Extract features using the specified model.
-    Extracts the features for the given text sequence based on the perplexities of the model GPTNeo for the given sequence
     """
     return model.extract_features(text)
 

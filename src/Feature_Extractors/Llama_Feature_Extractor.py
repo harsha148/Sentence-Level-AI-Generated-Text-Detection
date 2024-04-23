@@ -23,8 +23,9 @@ class Llama_Feature_Extractor(Base_Feature_Extractor):
         self.byte_decoder = {v: k for k, v in self.byte_encoder.items()}
 
     def extract_features(self, txt):
-        # extracts the features for the given text sequence based on the perplexities of the model Llama for the given
-        # sequence
+        """
+        Extracts the features for the given text sequence based on the perplexities of the model Llama for the given sequence
+        """
         tokens = self.tokenizer(txt, return_tensors='pt', truncation=True).to(self.device)
         input_token_ids = labels = tokens.input_ids[:, :1024, ]
         words = get_words(txt, True)
