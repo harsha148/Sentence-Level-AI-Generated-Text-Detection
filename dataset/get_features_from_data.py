@@ -46,7 +46,6 @@ def process_text_line(data, models):
 
 
 def process_file(input_file, output_file, models, max_workers=10):
-
     # Ensure the output directory exists
     output_dir = os.path.dirname(output_file)
     if not os.path.exists(output_dir):
@@ -94,4 +93,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-ᐧ
