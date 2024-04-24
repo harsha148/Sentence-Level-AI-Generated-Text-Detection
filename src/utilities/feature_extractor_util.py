@@ -34,8 +34,8 @@ def get_bytewise_loss(token_ids, loss_list, tokenizer, unicode_to_byte):
         tokenizer._convert_id_to_token(input_id)
         for input_id in token_ids
     ]
-    print(f'Tokens for the input text')
-    print(tokens)
+    # print(f'Tokens for the input text')
+    # print(tokens)
     bytewise_loss = []
     # setting the loss for the first subword that is tokenized as 0 (as we calculate the probabilities based as a causal
     # LM, and we won't be predicting the first word.

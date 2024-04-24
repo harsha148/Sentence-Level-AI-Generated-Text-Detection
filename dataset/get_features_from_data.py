@@ -45,7 +45,7 @@ def process_text_line(data, models):
     return aggregated_features
 
 
-def process_file(input_file, output_file, models, max_workers=10):
+def process_file(input_file, output_file, models, max_workers=30):
     # Ensure the output directory exists
     output_dir = os.path.dirname(output_file)
     if not os.path.exists(output_dir):
