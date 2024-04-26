@@ -4,12 +4,6 @@ import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
-
-# Import the feature extractor classes
-from src.Feature_Extractors.GPT2_Feature_Extractor import GPT2_Feature_Extractor
-from src.Feature_Extractors.GPTJ_Feature_Extractor import GPTJ_Feature_Extractor
-from src.Feature_Extractors.GPTNeo_Feature_Extractor import GPTNeo_Feature_Extractor
-from src.Feature_Extractors.Llama_Feature_Extractor import Llama_Feature_Extractor
 from src.utilities.common import get_model_by_enum
 
 # Label mapping dictionary
@@ -49,7 +43,7 @@ def process_text_line(data, model):
     return aggregated_features
 
 
-def process_file(input_file, output_file, model, max_workers=3):
+def process_file(input_file, output_file, model, max_workers=1):
     with open(input_file, 'r', encoding='utf-8') as file:
         lines = file.readlines()
 
