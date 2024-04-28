@@ -12,7 +12,7 @@ class Llama_Feature_Extractor(Base_Feature_Extractor):
         super().__init__()
         model_path = ''
         print('Initializing the tokenizer')
-        self.tokenizer = LlamaTokenizer.from_pretrained(model_path)
+        self.tokenizer = LlamaTokenizer.from_pretrained(model_path).to(self.device)
         print('Initialized tokenizer')
         print('Initializing the model for Llama')
         self.model = LlamaForCausalLM.from_pretrained(model_path)
@@ -27,7 +27,7 @@ class Llama_Feature_Extractor(Base_Feature_Extractor):
         Extracts the features for the given text sequence based on the perplexities of the model Llama for the given sequence
         """
         tokens = self.tokenizer(txt, return_tensors='pt', truncation=True).to(self.device)
-        input_token_ids = labels = tokens.input_ids[:, :1024, ]
+        input_token_ids = labels = tokens.input_ids[:, :1024, ].to(self.device)
         words = get_words(txt, True)
         outputs = self.model(input_token_ids)
         mean_loss, token_wise_loss_list = tokenwise_loss(outputs, labels)

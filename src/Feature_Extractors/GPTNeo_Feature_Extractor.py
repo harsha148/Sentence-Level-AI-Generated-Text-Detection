@@ -12,7 +12,7 @@ class GPTNeo_Feature_Extractor(Base_Feature_Extractor):
         super().__init__()
         self.tokenizer = transformers.AutoTokenizer.from_pretrained('EleutherAI/gpt-neo-2.7B')
         self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
-        self.model = transformers.AutoModelForCausalLM.from_pretrained('EleutherAI/gpt-neo-2.7B')
+        self.model = transformers.AutoModelForCausalLM.from_pretrained('EleutherAI/gpt-neo-2.7B').to(self.device)
         self.byte_encoder = bytes_to_unicode()
         self.byte_decoder = {unicode_val: byte_key for byte_key, unicode_val in self.byte_encoder.items()}
 
@@ -21,7 +21,7 @@ class GPTNeo_Feature_Extractor(Base_Feature_Extractor):
         Extracts the features for the given text sequence based on the perplexities of the model GPTNeo for the given sequence
         """
         tokens = self.tokenizer(txt, return_tensors='pt').to(self.device)
-        input_token_ids = labels = tokens.input_ids[:, :1024, ]
+        input_token_ids = labels = tokens.input_ids[:, :1024, ].to(self.device)
         outputs = self.model(input_token_ids)
         mean_loss, token_wise_loss_list = tokenwise_loss(outputs, labels)
         bytewise_loss_list = get_bytewise_loss(input_token_ids, token_wise_loss_list, self.tokenizer,
