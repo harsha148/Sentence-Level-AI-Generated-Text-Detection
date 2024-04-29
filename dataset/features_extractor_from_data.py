@@ -1,6 +1,5 @@
 import json
 import argparse
-import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
@@ -25,13 +24,15 @@ def extract_features(model, text):
 def process_text_line(data, model):
     text = data['text']
     label = data['label']
+    prompt_len = data['prompt_len']
     label_int = en_labels.get(label, None)
 
     aggregated_features = {
         'wordwise_loss_list': [],
         'label_int': label_int,
         'label': label,
-        'text': text
+        'text': text,
+        'prompt_len': prompt_len
     }
 
     try:

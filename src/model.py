@@ -23,7 +23,7 @@ class SeqXGPTModel(nn.Module):
             input_dim = dim
         self.conv = conv_layers
         self.seq_len = seq_len  # MAX Seq_len
-        embedding_size = 4 * 64
+        embedding_size = 3 * 64
         self.encoder_layer = TransformerEncoderLayer(
             d_model=embedding_size,
             nhead=16,
@@ -62,9 +62,7 @@ class SeqXGPTModel(nn.Module):
         out1 = self.extract_convolution_features(x[:, 0:1, :])
         out2 = self.extract_convolution_features(x[:, 1:2, :])
         out3 = self.extract_convolution_features(x[:, 2:3, :])
-        out4 = self.extract_convolution_features(x[:, 3:4, :])
-        out = torch.cat((out1, out2, out3, out4), dim=2)
-
+        out = torch.cat((out1, out2, out3), dim=2)
         outputs = out + self.position_encoding.to(out.device)
         outputs = self.norm(outputs)
         outputs = self.encoder(outputs, src_key_padding_mask=padding_mask)

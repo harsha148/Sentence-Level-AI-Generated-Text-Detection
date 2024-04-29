@@ -5,8 +5,8 @@ from tqdm import tqdm
 from pathlib import Path
 from datasets import Dataset, DatasetDict
 from torch.utils.data.dataloader import DataLoader, RandomSampler, SequentialSampler
-from utils import set_seed
-from feature_extractor_util import split_sentence
+from src.utilities.feature_extractor_util import split_sentence
+from src.utilities.utils import set_seed
 
 
 class DataHandler:
@@ -27,16 +27,15 @@ class DataHandler:
         if train_path:
             train_dict = self.prepare_dataset(train_path)
             dataset["train"] = Dataset.from_dict(train_dict)
-
         if test_path:
             test_dict = self.prepare_dataset(test_path)
             dataset["test"] = Dataset.from_dict(test_dict)
 
-        datasets_dict = DatasetDict(dataset)
+        self.datasets_dict = DatasetDict(dataset)
         if train_path:
-            self.train_dataloader = self.create_dataloader(datasets_dict["train"], is_train=True)
+            self.train_dataloader = self.create_dataloader(self.datasets_dict["train"], is_train=True)
         if test_path:
-            self.test_dataloader = self.create_dataloader(datasets_dict["test"])
+            self.test_dataloader = self.create_dataloader(self.datasets_dict["test"])
 
     def prepare_dataset(self, data_path, save_dir=''):
         processed_data_filename = Path(data_path).stem + "_processed.pkl"
@@ -50,6 +49,8 @@ class DataHandler:
 
         samples_dict = {'features': [], 'prompt_len': [], 'label': [], 'text': []}
         for sample in tqdm(samples, desc="Processing Data"):
+            if len(sample["wordwise_loss_list"]) == 0 or len(sample["wordwise_loss_list"][0]) == 0:
+                continue
             self.process_sample(sample, samples_dict)
 
         return samples_dict
@@ -57,10 +58,8 @@ class DataHandler:
     def process_sample(self, sample, samples_dict):
         text, label = sample['text'], sample['label']
         prompt_len, label_int = sample['prompt_len'], sample['label_int']
+        wordwise_loss_list = sample['wordwise_loss_list']
 
-        wordwise_loss_list = sample['wordwise_loss_list']  # This is a list of lists from different models
-
-        # Transpose to get list where each sublist contains features from all models for a particular word
         features_per_word = list(zip(*wordwise_loss_list))
         processed_features = [list(word_features) for word_features in features_per_word]
 
