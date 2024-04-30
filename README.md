@@ -116,6 +116,7 @@ As per the architecture discussed in the paper, the code for the model can be fo
 ## Training the SeqXGPT model
 
 ```bash
+# pass the number of training epochs or else it will be 20 by default
 python3 -m driver --data_path dataset/features --train_path dataset/train/train.jsonl --test_path dataset/test/test.jsonl --split_dataset --num_train_epochs=100 --gpu=gpu_count
 ```
 We can change other args like train_ratio, learning rate, warmup_ratio, weight_decay in the above script.
