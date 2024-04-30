@@ -23,7 +23,7 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-   
+**Note**: Use python or python3 script in all scripts if you face any issues with running the scripts.
 ## Datasets
 Each dataset contains six files. Within each dataset folder, based on the source of AI-generated sentences in the document, they are organized into different files. Below is SeqXGPT-Bench.
 
