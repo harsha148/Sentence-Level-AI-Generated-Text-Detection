@@ -8,11 +8,12 @@ from src.utilities.feature_extractor_util import split_sentence
 
 
 class Evaluator:
-    def __init__(self, data, model, en_labels, id2label, device):
+    def __init__(self, data, model, en_labels, id2label, seq_len, device):
         self.data = data
         self.model = model
         self.en_labels = en_labels
         self.id2label = id2label
+        self.seq_len = seq_len
         self.device = device
 
     def evaluate_model(self, content_level_eval=False):
@@ -35,6 +36,17 @@ class Evaluator:
                 predicted_labels.extend(predictions.cpu().tolist())
                 actual_labels.extend(labels.cpu().tolist())
                 all_logits.extend(logits.cpu().tolist())
+
+        print("****Word Level Evaluation****")
+        true_labels = np.array(actual_labels)
+        pred_labels = np.array(predicted_labels)
+        true_labels_1d = true_labels.reshape(-1)
+        pred_labels_1d = pred_labels.reshape(-1)
+        mask = true_labels_1d != -1
+        true_labels_1d = true_labels_1d[mask]
+        pred_labels_1d = pred_labels_1d[mask]
+        accuracy = (true_labels_1d == pred_labels_1d).astype(np.float32).mean().item()
+        print("Accuracy: {:.1f}".format(accuracy * 100))
 
         if content_level_eval:
             print("**** Content Level Evaluation ****")
@@ -64,9 +76,15 @@ class Evaluator:
         for text, actual, predicted in zip(texts, actual_labels, predicted_labels):
             sentence_actual_labels.extend(self.extract_sentence_labels(text, actual))
             sentence_predicted_labels.extend(self.extract_sentence_labels(text, predicted))
-        return self.calculate_metrics(sentence_actual_labels, sentence_predicted_labels)
+        true_sent_labels = [self.en_labels[label] for label in sentence_actual_labels]
+        pred_sent_labels = [self.en_labels[label] for label in sentence_predicted_labels]
+        return self.calculate_metrics(true_sent_labels, pred_sent_labels)
 
     def extract_sentence_labels(self, text, labels):
+        try:
+            nltk.data.find('tokenizers/punkt')
+        except LookupError:
+            nltk.download('punkt')
         tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
         sentences = tokenizer.tokenize(text)
         offset = 0
@@ -75,21 +93,26 @@ class Evaluator:
             start = text[offset:].find(sentence) + offset
             end = start + len(sentence)
             offset = end
-            split_function = split_sentence(self.data)
-            last_word_index = len(split_function(text[:end]))
-            if last_word_index > self.data.seq_len:
+            # Use split_sentence directly on the text segment
+            sentence_tokens = split_sentence(text[start:end])  # This should return a list of words/tokens
+            last_word_index = len(split_sentence(text[:end]))  # This should also return a list, then take its length
+            if last_word_index > self.seq_len:
                 break
-            num_words = len(split_function(text[start:end]))
+            num_words = len(sentence_tokens)
             first_word_index = last_word_index - num_words
             relevant_tags = labels[first_word_index:last_word_index]
             most_common_tag = self.get_most_common_tag(relevant_tags)
             sentence_labels.append(most_common_tag[0])
+
+        if len(sentence_labels) == 0:
+            print("empty sent label list")
         return sentence_labels
 
     def get_most_common_tag(self, tags):
-        tags = [self.id2label[tag] for tag in tags if tag != -1]
-        tag_count = Counter(tags)
-        most_common_tag = tag_count.most_common(1)[0]
+        tags = [self.id2label[tag] for tag in tags]
+        tags = [tag.split('-')[-1] for tag in tags]
+        tag_counts = Counter(tags)
+        most_common_tag = tag_counts.most_common(1)[0]
         return most_common_tag
 
     def calculate_metrics(self, true_labels, predicted_labels):
@@ -99,7 +122,8 @@ class Evaluator:
         recall = recall_score(true_labels, predicted_labels, average='macro')
         print(f"Accuracy: {accuracy * 100:.1f}%")
         print(f"Macro F1 Score: {macro_f1 * 100:.1f}%")
-        print("Precision/Recall per class:")
-        precision_recall = ' '.join([f"{p * 100:.1f}/{r * 100:.1f}" for p, r in zip(precision, recall)])
-        print(precision_recall)
+        print(f"Precision: {precision * 100:.1f}%")
+        print(f"Recall: {recall * 100:.1f}%")
         return {"precision": precision, "recall": recall, "accuracy": accuracy, "macro_f1": macro_f1}
+
+
