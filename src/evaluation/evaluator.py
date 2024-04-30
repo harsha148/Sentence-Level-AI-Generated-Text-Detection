@@ -1,3 +1,4 @@
+import pandas as pd
 import torch
 import numpy as np
 from tqdm import tqdm
@@ -16,7 +17,7 @@ class Evaluator:
         self.seq_len = seq_len
         self.device = device
 
-    def evaluate_model(self, content_level_eval=False):
+    def evaluate_model(self, document_level_eval=False):
         self.model.eval()
         document_texts = []
         actual_labels = []
@@ -37,25 +38,14 @@ class Evaluator:
                 actual_labels.extend(labels.cpu().tolist())
                 all_logits.extend(logits.cpu().tolist())
 
-        print("****Word Level Evaluation****")
-        true_labels = np.array(actual_labels)
-        pred_labels = np.array(predicted_labels)
-        true_labels_1d = true_labels.reshape(-1)
-        pred_labels_1d = pred_labels.reshape(-1)
-        mask = true_labels_1d != -1
-        true_labels_1d = true_labels_1d[mask]
-        pred_labels_1d = pred_labels_1d[mask]
-        accuracy = (true_labels_1d == pred_labels_1d).astype(np.float32).mean().item()
-        print("Accuracy: {:.1f}".format(accuracy * 100))
-
-        if content_level_eval:
-            print("**** Content Level Evaluation ****")
-            return self.evaluate_content_level(document_texts, actual_labels, predicted_labels)
+        if document_level_eval:
+            print("**** Document Level Evaluation ****")
+            return self.evaluate_document_level(document_texts, actual_labels, predicted_labels)
         else:
             print("**** Sentence Level Evaluation ****")
             return self.evaluate_sentence_level(document_texts, actual_labels, predicted_labels)
 
-    def evaluate_content_level(self, texts, actual_labels, predicted_labels):
+    def evaluate_document_level(self, texts, actual_labels, predicted_labels):
         content_actual_labels = []
         content_predicted_labels = []
         for text, actual, predicted in zip(texts, actual_labels, predicted_labels):
@@ -68,7 +58,7 @@ class Evaluator:
             predicted_major_tag = self.get_most_common_tag(predicted)
             content_actual_labels.append(self.en_labels[actual_major_tag[0]])
             content_predicted_labels.append(self.en_labels[predicted_major_tag[0]])
-        return self.calculate_metrics(content_actual_labels, content_predicted_labels)
+        return self.calculate_metrics(content_actual_labels, content_predicted_labels, self.en_labels)
 
     def evaluate_sentence_level(self, texts, actual_labels, predicted_labels):
         sentence_actual_labels = []
@@ -78,7 +68,7 @@ class Evaluator:
             sentence_predicted_labels.extend(self.extract_sentence_labels(text, predicted))
         true_sent_labels = [self.en_labels[label] for label in sentence_actual_labels]
         pred_sent_labels = [self.en_labels[label] for label in sentence_predicted_labels]
-        return self.calculate_metrics(true_sent_labels, pred_sent_labels)
+        return self.calculate_metrics(true_sent_labels, pred_sent_labels, self.en_labels)
 
     def extract_sentence_labels(self, text, labels):
         try:
@@ -103,9 +93,6 @@ class Evaluator:
             relevant_tags = labels[first_word_index:last_word_index]
             most_common_tag = self.get_most_common_tag(relevant_tags)
             sentence_labels.append(most_common_tag[0])
-
-        if len(sentence_labels) == 0:
-            print("empty sent label list")
         return sentence_labels
 
     def get_most_common_tag(self, tags):
@@ -115,15 +102,60 @@ class Evaluator:
         most_common_tag = tag_counts.most_common(1)[0]
         return most_common_tag
 
-    def calculate_metrics(self, true_labels, predicted_labels):
-        accuracy = accuracy_score(true_labels, predicted_labels)
-        macro_f1 = f1_score(true_labels, predicted_labels, average='macro')
-        precision = precision_score(true_labels, predicted_labels, average='macro')
-        recall = recall_score(true_labels, predicted_labels, average='macro')
-        print(f"Accuracy: {accuracy * 100:.1f}%")
-        print(f"Macro F1 Score: {macro_f1 * 100:.1f}%")
-        print(f"Precision: {precision * 100:.1f}%")
-        print(f"Recall: {recall * 100:.1f}%")
-        return {"precision": precision, "recall": recall, "accuracy": accuracy, "macro_f1": macro_f1}
+    """
+        Uncomment the below and use as the calculate_metrics for binary classification
+        Comment it for mixed model multi-class AIGT detection and for particular model binary AIGT detection
+    """
 
+    # def calculate_metrics(self, true_labels, predicted_labels, labels_dict):
+    #     # Reverse the labels_dict to get a dictionary from numbers to labels
+    #     number_to_label = {v: k for k, v in labels_dict.items()}
+    #
+    #     # Convert numeric labels to 'AI' or 'Human'
+    #     true_labels_converted = ['Human' if number_to_label[label] == 'human' else 'AI' for label in true_labels]
+    #     predicted_labels_converted = ['Human' if number_to_label[label] == 'human' else 'AI' for label in
+    #                                   predicted_labels]
+    #
+    #     # Calculate the metrics
+    #     accuracy = accuracy_score(true_labels_converted, predicted_labels_converted)
+    #     precision = precision_score(true_labels_converted, predicted_labels_converted, average=None,
+    #                                 labels=['AI', 'Human'])
+    #     recall = recall_score(true_labels_converted, predicted_labels_converted, average=None, labels=['AI', 'Human'])
+    #     f1 = f1_score(true_labels_converted, predicted_labels_converted, average=None, labels=['AI', 'Human'])
+    #     # Prepare the data for display
+    #     metrics_df = pd.DataFrame({
+    #         'Class': ['AI', 'Human'],
+    #         'Precision': precision,
+    #         'Recall': recall,
+    #         'F1-score': f1
+    #     })
+    #
+    #     # Print formatted table
+    #     print(metrics_df.to_string(index=False))
+    #
+    #     return {"precision": precision, "recall": recall, "accuracy": accuracy,
+    #             "macro_f1": f1_score(true_labels_converted, predicted_labels_converted, average='macro')}
+    """
+        Use the below calculate_metrics method for mixed model multi-class AIGT detection 
+        Also for particular model binary AIGT detection
+        Comment it out for mixed model binary AIGT detection     
+    """
+    def calculate_metrics(self, true_labels, predicted_labels, labels_dict):
+        accuracy = accuracy_score(true_labels, predicted_labels)
+        f1 = f1_score(true_labels, predicted_labels, average=None)
+        macro_f1 = f1_score(true_labels, predicted_labels, average='macro')
+        precision = precision_score(true_labels, predicted_labels, average=None)
+        recall = recall_score(true_labels, predicted_labels, average=None)
+
+        metrics_df = pd.DataFrame({
+            'Class': [key for key in labels_dict.keys()],
+            'Precision': precision,
+            'Recall': recall,
+            'F1-score': f1
+        })
+
+        print("Evaluation Metrics:")
+        print(metrics_df.to_string(index=False))
+
+        return {"precision": precision, "recall": recall, "accuracy": accuracy, "macro_f1": macro_f1}
 

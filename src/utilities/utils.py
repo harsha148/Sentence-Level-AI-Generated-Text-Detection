@@ -59,6 +59,8 @@ def dataset_split_helper(data_path, train_path, test_path, train_ratio=0.9):
             logging.error("Failed to process file %s: %s", file_path, e)
             continue
 
+    random.seed(0)
+    random.shuffle(data_samples)
     splitting_index = int(len(data_samples) * train_ratio)
     train_data = data_samples[:splitting_index]
     test_data = data_samples[splitting_index:]

@@ -39,7 +39,7 @@ class Trainer:
                                                          num_warmup_steps=self.warm_up_ratio * total_train_steps,
                                                          num_training_steps=total_train_steps)
 
-    def train(self, ckpt_filename='linear_en.pt'):
+    def train(self, ckpt_filename='saved_model.pt'):
         for epoch in trange(int(self.num_train_epochs), desc="Epoch"):
             self.model.train()
             tr_loss = 0
