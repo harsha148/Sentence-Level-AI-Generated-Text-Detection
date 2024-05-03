@@ -1,14 +1,8 @@
 # Sentence-Level-AI-Generated-Text-Detection
-SeqXGPT is a model for sentence level AI generated text detection. 
+
+Our project is based on SeqXGPT which is a framework for AT-Generated Text Detection.
 The implementation is based on the paper [SeqXGPT: Sentence-Level AI-Generated Text Generation](https://arxiv.org/abs/2310.08903)
 
-## SeqXGPT
-
-SeqXGPT is an advanced technique for sentence-level AI-generated text detection. The model architecture comprises of the following three parts: 
-
-1. Perplexity(Feature) Extraction
-2. Feature Encoder
-3. Linear Classification Layer
 
 ## Setting up the project
 
@@ -24,6 +18,15 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 **Note**: Use python or python3 script in all scripts if you face any issues with running the scripts.
+
+## Methodology
+
+Our approach is based on SeqXGPT which is an advanced technique for sentence-level AI-generated text detection. The model architecture comprises of the following three parts: 
+
+1. Perplexity(Feature) Extraction
+2. Feature Encoder
+3. Linear Classification Layer
+
 ## Datasets
 Each dataset contains six files. Within each dataset folder, based on the source of AI-generated sentences in the document, they are organized into different files. Below is SeqXGPT-Bench.
 
