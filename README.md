@@ -134,9 +134,12 @@ We can change other args like train_ratio, learning rate, warmup_ratio, weight_d
 
 For evaluation, we have provided the trained model file (saved_model.pt), which you can use to run the test scripts directly
 
+Also provided a file dataset/test_data.jsonl (which was generated and processed after the feature extraction step) which can be used for the script.
+You can generate your own test_files too by the process discussed before.
+
 ```bash
 # Give --document_level_eval as arg if you want documenet level evaluation else it will be sentence level evaluation by default
-python3 -m driver --test_path dataset/test/test.jsonl --gpu=gpu_count --inference 
+python3 -m driver --test_path dataset/test/test_data.jsonl --gpu=gpu_count --inference 
 ```
 
 ## Miscellanous
