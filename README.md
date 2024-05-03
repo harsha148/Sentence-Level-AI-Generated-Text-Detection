@@ -23,7 +23,7 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-   
+**Note**: Use python or python3 script in all scripts if you face any issues with running the scripts.
 ## Datasets
 Each dataset contains six files. Within each dataset folder, based on the source of AI-generated sentences in the document, they are organized into different files. Below is SeqXGPT-Bench.
 
@@ -116,6 +116,7 @@ As per the architecture discussed in the paper, the code for the model can be fo
 ## Training the SeqXGPT model
 
 ```bash
+# pass the number of training epochs or else it will be 20 by default
 python3 -m driver --data_path dataset/features --train_path dataset/train/train.jsonl --test_path dataset/test/test.jsonl --split_dataset --num_train_epochs=100 --gpu=gpu_count
 ```
 We can change other args like train_ratio, learning rate, warmup_ratio, weight_decay in the above script.
@@ -123,9 +124,27 @@ We can change other args like train_ratio, learning rate, warmup_ratio, weight_d
 ## Evaluation
 
 ```bash
-# Add --test_content as arg if you want content level evaluation else it will be sentence level evaluation by default
-python3 -m driver --train_path dataset/train/train.jsonl --test_path dataset/test/test.jsonl --gpu=gpu_count --inference 
+# Give --document_level_eval as arg if you want documenet level evaluation else it will be sentence level evaluation by default
+python3 -m driver --test_path dataset/test/test.jsonl --gpu=gpu_count --inference 
 ```
+
+## Miscellanous
+
+For generation of results for particular model binary AIGT detection, we need test data containing only these pairs of data at a time like:
+
+(gpt2, human), (gpt3, human), (gptneo, human), (gptj, human), (llama, human)
+
+To filter the test.jsonl file we had generated during the training, we use the following script:
+
+```bash
+# Pass the path to the test.jsonl file and the path and name of the file where you want the test data which should be from only the pairs of labels
+# eg. pass --labels gpt2 human, --labels gpt3 human, --labels gptneo human, --labels gptj human, --labels llama human
+python3 -m dataset.filter_test_data --input_file dataset/test/test.jsonl --output_file dataset/test/output_test.jsonl --labels name_label_1 name_label_2
+```
+
+For the evaluation we have a file evaluator.py where you can choose the calculate_metrics method as per the evaluation you want to do (Multi-class vs Binary)
+
+Just uncomment, comment the different implementation of calculate_metrics as per the comments added.
 
 ## Results
 
