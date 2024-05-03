@@ -1,6 +1,11 @@
 # Sentence-Level-AI-Generated-Text-Detection
 
+<p align="center">
+  <img src="https://github.com/harsha148/Sentence-Level-AI-Generated-Text-Detection/blob/main/AI-generated-text-detection.png" alt="AI Text Detection" title="AI Text Detection">
+</p>
+
 Our project is based on SeqXGPT which is a framework for AT-Generated Text Detection.
+
 The implementation is based on the paper [SeqXGPT: Sentence-Level AI-Generated Text Generation](https://arxiv.org/abs/2310.08903)
 
 
