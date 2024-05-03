@@ -31,18 +31,22 @@ def parse_args():
 def main():
     args = parse_args()
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
-    en_labels = {'gpt2': 0, 'gptneo': 1, 'gptj': 2, 'llama': 3, 'gpt3re': 4, 'human': 5}
-    """Use the below en_labels instead for binary classification"""
-    # en_labels = {'gpt2': 0, 'gptneo': 0, 'gptj': 0, 'llama': 0, 'gpt3re': 0, 'human': 1}
-    id2label = create_tag_mapping(en_labels)
+
+    # Use the below labels for mixed model multi-class classification
+    labels = {'gpt2': 0, 'gptneo': 1, 'gptj': 2, 'llama': 3, 'gpt3re': 4, 'human': 5}
+
+    # Use the below labels instead for mixed model binary classification
+    # labels = {'gpt2': 0, 'gptneo': 0, 'gptj': 0, 'llama': 0, 'gpt3re': 0, 'human': 1}
+
+    id2label = create_tag_mapping(labels)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     if args.inference:
         print("Log INFO: Performing test...")
-        model_path = 'model_150_epochs.pt'  # Provide the path of the saved checkpoint file
+        model_path = 'saved_model.pt'  # Provide the path of the saved checkpoint file
         data = DataHandler(args.train_path, args.test_path, args.batch_size, args.seq_len, 'human', id2label)
         model = torch.load(model_path, map_location=device)
-        evaluator = Evaluator(data, model, en_labels, id2label, args.seq_len, device)
+        evaluator = Evaluator(data, model, labels, id2label, args.seq_len, device)
         evaluation_results = evaluator.evaluate_model(document_level_eval=args.document_level_eval)
         print("Evaluation Results:", evaluation_results)
     else:
@@ -50,9 +54,9 @@ def main():
             dataset_split_helper(args.data_path, args.train_path, args.test_path, args.train_ratio)
         data = DataHandler(args.train_path, args.test_path, args.batch_size, args.seq_len, 'human', id2label)
         model = SeqXGPTModel(id2labels=id2label, seq_len=args.seq_len).to(device)
-        trainer = Trainer(data, model, en_labels, id2label, args)
+        trainer = Trainer(data, model, args)
         print("Log INFO: Starting training...")
-        trainer.train()
+        trainer.train()  # Can pass checkpoint file name as argument, default is saved_model.pt
 
 
 if __name__ == "__main__":

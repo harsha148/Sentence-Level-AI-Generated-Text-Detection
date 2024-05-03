@@ -6,7 +6,7 @@ from tqdm import tqdm
 from src.utilities.common import get_model_by_enum
 
 # Label mapping dictionary
-en_labels = {
+labels = {
     'gpt2': 0,
     'gptneo': 1,
     'gptj': 1,
@@ -25,7 +25,7 @@ def process_text_line(data, model):
     text = data['text']
     label = data['label']
     prompt_len = data['prompt_len']
-    label_int = en_labels.get(label, None)
+    label_int = labels.get(label, None)
 
     aggregated_features = {
         'wordwise_loss_list': [],

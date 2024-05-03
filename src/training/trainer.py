@@ -4,13 +4,11 @@ from transformers.optimization import AdamW, get_linear_schedule_with_warmup
 
 
 class Trainer:
-    def __init__(self, data, model, en_labels, id2label, args):
+    def __init__(self, data, model, args):
         self.scheduler = None
         self.optimizer = None
         self.data = data
         self.model = model
-        self.en_labels = en_labels
-        self.id2label = id2label
 
         self.seq_len = args.seq_len
         self.num_train_epochs = args.num_train_epochs

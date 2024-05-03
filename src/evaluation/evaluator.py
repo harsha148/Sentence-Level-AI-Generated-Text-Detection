@@ -9,10 +9,10 @@ from src.utilities.feature_extractor_util import split_sentence
 
 
 class Evaluator:
-    def __init__(self, data, model, en_labels, id2label, seq_len, device):
+    def __init__(self, data, model, labels, id2label, seq_len, device):
         self.data = data
         self.model = model
-        self.en_labels = en_labels
+        self.labels = labels
         self.id2label = id2label
         self.seq_len = seq_len
         self.device = device
@@ -56,9 +56,9 @@ class Evaluator:
             predicted = predicted[valid_mask].tolist()
             actual_major_tag = self.get_most_common_tag(actual)
             predicted_major_tag = self.get_most_common_tag(predicted)
-            content_actual_labels.append(self.en_labels[actual_major_tag[0]])
-            content_predicted_labels.append(self.en_labels[predicted_major_tag[0]])
-        return self.calculate_metrics(content_actual_labels, content_predicted_labels, self.en_labels)
+            content_actual_labels.append(self.labels[actual_major_tag[0]])
+            content_predicted_labels.append(self.labels[predicted_major_tag[0]])
+        return self.calculate_metrics(content_actual_labels, content_predicted_labels, self.labels)
 
     def evaluate_sentence_level(self, texts, actual_labels, predicted_labels):
         sentence_actual_labels = []
@@ -66,9 +66,9 @@ class Evaluator:
         for text, actual, predicted in zip(texts, actual_labels, predicted_labels):
             sentence_actual_labels.extend(self.extract_sentence_labels(text, actual))
             sentence_predicted_labels.extend(self.extract_sentence_labels(text, predicted))
-        true_sent_labels = [self.en_labels[label] for label in sentence_actual_labels]
-        pred_sent_labels = [self.en_labels[label] for label in sentence_predicted_labels]
-        return self.calculate_metrics(true_sent_labels, pred_sent_labels, self.en_labels)
+        true_sent_labels = [self.labels[label] for label in sentence_actual_labels]
+        pred_sent_labels = [self.labels[label] for label in sentence_predicted_labels]
+        return self.calculate_metrics(true_sent_labels, pred_sent_labels, self.labels)
 
     def extract_sentence_labels(self, text, labels):
         try:
