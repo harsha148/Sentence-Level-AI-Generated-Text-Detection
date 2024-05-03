@@ -210,7 +210,7 @@ The sentence level resutls are as follows:
 
 ### For Out-of-Distribution (OOD) dataset:
 
-### Mixed-Model multi-class AIGT Detection on Out-of-Distribution(OOD) dataset 
+**Mixed-Model multi-class AIGT Detection on Out-of-Distribution(OOD) dataset**
 
 For the dataset you can refer dataset/OOD
 
